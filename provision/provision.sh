@@ -639,7 +639,7 @@ wpsvn_check() {
 
   if [[ "$svn_test" == *"svn upgrade"* ]]; then
   # If the wordpress-develop svn repo needed an upgrade, they probably all need it
-    for repo in $(find /srv/www -maxdepth 5 -type d -name '.svn'); do
+    for repo in $(find /srv/www -maxdepth 5 -follow -type d -name '.svn'); do
       svn upgrade "${repo/%\.svn/}"
     done
   fi;
@@ -727,7 +727,7 @@ custom_vvv(){
   find /etc/nginx/custom-sites -name 'vvv-auto-*.conf' -exec rm {} \;
 
   # Look for site setup scripts
-  for SITE_CONFIG_FILE in $(find /srv/www -maxdepth 5 -name 'vvv-init.sh'); do
+  for SITE_CONFIG_FILE in $(find /srv/www -maxdepth 5 -follow -name 'vvv-init.sh'); do
     DIR="$(dirname "$SITE_CONFIG_FILE")"
     (
     cd "$DIR"
@@ -736,7 +736,7 @@ custom_vvv(){
   done
 
   # Look for Nginx vhost files, symlink them into the custom sites dir
-  for SITE_CONFIG_FILE in $(find /srv/www -maxdepth 5 -name 'vvv-nginx.conf'); do
+  for SITE_CONFIG_FILE in $(find /srv/www -maxdepth 5 -follow -name 'vvv-nginx.conf'); do
     DEST_CONFIG_FILE=${SITE_CONFIG_FILE//\/srv\/www\//}
     DEST_CONFIG_FILE=${DEST_CONFIG_FILE//\//\-}
     DEST_CONFIG_FILE=${DEST_CONFIG_FILE/%-vvv-nginx.conf/}
@@ -757,7 +757,7 @@ custom_vvv(){
   sed -n '/# vvv-auto$/!p' /etc/hosts > /tmp/hosts
   mv /tmp/hosts /etc/hosts
   echo "Adding domains to the virtual machine's /etc/hosts file..."
-  find /srv/www/ -maxdepth 5 -name 'vvv-hosts' | \
+  find /srv/www/ -maxdepth 5 -follow -name 'vvv-hosts' | \
   while read hostfile; do
     while IFS='' read -r line || [ -n "$line" ]; do
       if [[ "#" != ${line:0:1} ]]; then
